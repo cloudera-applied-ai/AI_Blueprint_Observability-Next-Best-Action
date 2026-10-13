@@ -1,0 +1,1025 @@
+/* NBA chatbot UI.
+ *
+ * Two panes: conversation on the left, graph telemetry on the right. Both
+ * halves of the demo are on screen at once, which is the whole pitch of the
+ * blueprint - the customer view and the operator view side by side.
+ *
+ * THEMING. Light is the default, unconditionally. There is deliberately no
+ * `prefers-color-scheme` query in this file: dark is something the viewer
+ * opts into, and the choice is remembered in localStorage and applied as
+ * `data-theme` on <html> (see src/theme.ts). The dark steps below are chosen
+ * against the dark surface rather than being an algorithmic inversion of the
+ * light ones.
+ *
+ * MARK COLORS. --meter-* and --status-* are reserved for state and are never
+ * reused for decoration. Both meter colors were validated against their own
+ * surface for contrast and colour-vision separation. Status text always stays
+ * in an ink token; a coloured dot plus a word carries the state, so meaning
+ * never rests on hue alone.
+ */
+
+:root {
+  /* --- surfaces & ink (light) --- */
+  --bg: #fbfcfe;
+  --surface: #ffffff;
+  --surface-2: #f6f8fc;
+  --border: #eaeef5;
+  --border-strong: #d8dfeb;
+  --text: #101828;
+  --text-muted: #5b6478;
+
+  /* --- accent ramp: the meter track is a lighter step of the fill's hue --- */
+  --accent-050: #eef2ff;
+  --accent-100: #dfe6ff;
+  --accent-200: #c3d0fe;
+  --accent: #3d63f5;
+  --accent-hover: #2f4ede;
+  --accent-contrast: #ffffff;
+
+  /* --- chat --- */
+  --user-bubble: #3d63f5;
+  --user-text: #ffffff;
+  --bot-bubble: #f2f5fb;
+
+  /* --- meter (validated: all checks pass on #ffffff) --- */
+  --meter-fill: #3d63f5;
+  --meter-breach: #c92a2a;
+  --meter-track: #dfe6ff;
+
+  /* --- status marks (icon + label always accompany these) --- */
+  --status-good: #0ca30c;
+  --status-warn: #fab219;
+  --status-critical: #d03b3b;
+  --good-soft: #eafaea;
+  --warn-soft: #fff7e6;
+  --critical-soft: #fdeded;
+
+  /* --- spacing scale --- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 4px 14px rgba(16, 24, 40, 0.05);
+  --shadow-lg: 0 8px 28px rgba(16, 24, 40, 0.12);
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+
+:root[data-theme="dark"] {
+  --bg: #0f1218;
+  --surface: #161a23;
+  --surface-2: #1d222e;
+  --border: #2a3142;
+  --border-strong: #3a4257;
+  --text: #e9edf5;
+  --text-muted: #98a2b8;
+
+  --accent-050: #1a2133;
+  --accent-100: #212b42;
+  --accent-200: #2c3958;
+  --accent: #8098ff;
+  --accent-hover: #9aacff;
+  --accent-contrast: #0f1218;
+
+  --user-bubble: #3d63f5;
+  --user-text: #ffffff;
+  --bot-bubble: #1f2534;
+
+  /* validated: all checks pass on #161a23 */
+  --meter-fill: #5f7cf0;
+  --meter-breach: #e85d5d;
+  --meter-track: #262f47;
+
+  --status-good: #3ddc97;
+  --status-warn: #f0b429;
+  --status-critical: #ff7a7a;
+  --good-soft: #12281f;
+  --warn-soft: #2a2312;
+  --critical-soft: #2c1a1c;
+
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 4px 14px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 8px 28px rgba(0, 0, 0, 0.55);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+/* One focus treatment for everything interactive. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ---------------------------------------------------------------- topbar */
+
+.topbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-5);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.topbar__brand {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.topbar__mark {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-050);
+  color: var(--accent);
+  font-size: 15px;
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.topbar__sub {
+  margin: 1px 0 0;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+/* align-items:center on the row does the alignment that a hard-coded
+   margin-top used to fake. */
+.topbar__controls {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 300px;
+}
+
+.field label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+select {
+  padding: 8px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+select:hover {
+  border-color: var(--accent);
+}
+
+.hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  min-height: 16px;
+}
+
+.hint--warn {
+  color: var(--text);
+  font-weight: 550;
+}
+
+/* ---------------------------------------------------------------- buttons */
+
+.btn {
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 550;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, opacity 0.15s, color 0.15s;
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn--primary {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.btn--primary:not(:disabled):hover {
+  background: var(--accent-hover);
+}
+
+.btn--ghost {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border-strong);
+  white-space: nowrap;
+}
+
+.btn--ghost:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.btn--icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  font-size: 16px;
+  line-height: 1;
+  background: var(--surface);
+  color: var(--text-muted);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.btn--icon:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* ---------------------------------------------------------------- layout */
+
+.layout {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 376px;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5) var(--space-5);
+}
+
+.panel {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.panel__header {
+  padding: var(--space-4) var(--space-4) var(--space-3);
+  border-bottom: 1px solid var(--border);
+}
+
+.panel__header h2 {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 650;
+}
+
+.panel__header p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ---------------------------------------------------------------- chat */
+
+.chat {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  scroll-behavior: smooth;
+}
+
+/* --- empty state --- */
+
+.chat__empty {
+  margin: auto;
+  max-width: 460px;
+  text-align: center;
+}
+
+.chat__empty-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto var(--space-3);
+  border-radius: 50%;
+  background: var(--accent-050);
+  color: var(--accent);
+  font-size: 22px;
+}
+
+.chat__empty h2 {
+  margin: 0 0 var(--space-2);
+  font-size: 18px;
+  font-weight: 650;
+}
+
+.chat__empty p {
+  margin: 0 0 var(--space-4);
+  font-size: 13.5px;
+  color: var(--text-muted);
+}
+
+.chat__suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.suggestion {
+  padding: 10px var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 13.5px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.suggestion:hover {
+  border-color: var(--accent);
+  background: var(--accent-050);
+}
+
+.suggestion__arrow {
+  float: right;
+  color: var(--text-muted);
+}
+
+/* --- messages --- */
+
+.msg {
+  display: flex;
+  flex-direction: column;
+  max-width: 78%;
+}
+
+.msg--user {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.msg--assistant {
+  align-self: flex-start;
+}
+
+.msg__bubble {
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: var(--bot-bubble);
+  overflow-wrap: anywhere;
+}
+
+.msg--user .msg__bubble {
+  background: var(--user-bubble);
+  color: var(--user-text);
+  border-bottom-right-radius: 4px;
+}
+
+.msg--assistant .msg__bubble {
+  border-bottom-left-radius: 4px;
+}
+
+.msg__bubble p {
+  margin: 0 0 var(--space-2);
+}
+
+.msg__bubble p:last-child {
+  margin-bottom: 0;
+}
+
+.msg__bubble ul {
+  margin: var(--space-2) 0;
+  padding-left: 20px;
+}
+
+.msg__bubble code {
+  font-family: var(--mono);
+  font-size: 0.9em;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: rgba(127, 127, 127, 0.18);
+}
+
+/* Errors read as system notices, not as the assistant talking. */
+.msg--error {
+  max-width: 100%;
+  align-self: stretch;
+}
+
+.msg--error .msg__bubble {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  background: var(--critical-soft);
+  border: 1px solid var(--status-critical);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 13.5px;
+}
+
+.msg__error-icon {
+  color: var(--status-critical);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.msg__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: 5px;
+  padding-left: var(--space-1);
+  min-height: 22px;
+}
+
+.msg--user .msg__actions {
+  padding-right: var(--space-1);
+  padding-left: 0;
+}
+
+.thumb,
+.msg__copy {
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-size: 13px;
+  cursor: pointer;
+  line-height: 1.2;
+  color: var(--text-muted);
+  opacity: 0.6;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.thumb:hover:not(:disabled),
+.msg__copy:hover {
+  opacity: 1;
+  background: var(--surface-2);
+}
+
+.thumb:disabled {
+  cursor: default;
+}
+
+.thumb--chosen {
+  opacity: 1;
+  border-color: var(--accent);
+}
+
+.msg__time,
+.msg__runid {
+  font-size: 10.5px;
+  color: var(--text-muted);
+}
+
+.msg__runid {
+  margin-left: var(--space-1);
+  font-family: var(--mono);
+  cursor: help;
+}
+
+.msg__time {
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- typing indicator --- */
+
+.msg--typing .msg__bubble {
+  display: flex;
+  gap: var(--space-1);
+  align-items: center;
+  padding: 14px;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  animation: blink 1.4s infinite ease-in-out both;
+}
+
+.dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes blink {
+  0%,
+  80%,
+  100% {
+    opacity: 0.25;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+/* --- scroll to bottom --- */
+
+.scroll-bottom {
+  position: absolute;
+  right: var(--space-5);
+  bottom: 84px;
+  display: none;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-lg);
+  cursor: pointer;
+  font-size: 15px;
+  z-index: 5;
+}
+
+.scroll-bottom--visible {
+  display: grid;
+}
+
+/* ---------------------------------------------------------------- composer */
+
+.composer {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-end;
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--border);
+}
+
+.composer__input {
+  flex: 1;
+  resize: none;
+  padding: 10px var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  max-height: 160px;
+}
+
+.composer__input::placeholder {
+  color: var(--text-muted);
+}
+
+.composer__input:disabled {
+  opacity: 0.6;
+  background: var(--surface-2);
+}
+
+/* ---------------------------------------------------------- observability */
+
+.obs {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-4);
+}
+
+.obs__section {
+  margin: var(--space-5) 0 var(--space-2);
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+}
+
+.obs__section:first-child {
+  margin-top: 0;
+}
+
+/* --- hero figure: the one number the panel leads with --- */
+
+.obs__hero {
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.obs__hero-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Proportional figures, not tabular: at display sizes tabular-nums gives
+   every digit the width of a zero and the number looks loose. */
+.obs__hero-value {
+  margin-top: 2px;
+  font-size: 48px;
+  font-weight: 650;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.obs__hero-value--muted {
+  color: var(--text-muted);
+  font-size: 30px;
+}
+
+/* --- meter: one ratio against a limit --- */
+
+.meter {
+  position: relative;
+  height: 8px;
+  margin-top: var(--space-3);
+  border-radius: 999px;
+  background: var(--meter-track);
+  overflow: hidden;
+}
+
+.meter__fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--meter-fill);
+  transition: width 0.35s ease, background 0.2s;
+}
+
+.meter__fill--breach {
+  background: var(--meter-breach);
+}
+
+/* The decision boundary. Drawn over the track so it reads whether or not the
+   fill has reached it. */
+.meter__threshold {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  background: var(--text);
+  opacity: 0.55;
+  border-radius: 1px;
+}
+
+.meter__scale {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+  font-size: 10.5px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- KPI tiles --- */
+
+.obs__tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.tile {
+  padding: 10px var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+
+.tile--wide {
+  grid-column: 1 / -1;
+}
+
+.tile__label {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.tile__value {
+  margin-top: 2px;
+  font-size: 14px;
+  font-weight: 600;
+  /* Ink, never the status hue - a dot carries the state instead. */
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dot-mark {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot-mark--good {
+  background: var(--status-good);
+}
+
+.dot-mark--warn {
+  background: var(--status-warn);
+}
+
+.dot-mark--critical {
+  background: var(--status-critical);
+}
+
+.tile__icon {
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.tile__icon--good {
+  color: var(--status-good);
+}
+
+.tile__icon--critical {
+  color: var(--status-critical);
+}
+
+/* --- clarify segments --- */
+
+.segments {
+  display: flex;
+  gap: 3px;
+  margin-top: 6px;
+}
+
+.segment {
+  flex: 1;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--meter-track);
+}
+
+.segment--on {
+  background: var(--meter-fill);
+}
+
+.segment--cap {
+  background: var(--status-warn);
+}
+
+/* --- offer card --- */
+
+.obs__offer {
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-sm);
+  background: var(--accent-050);
+}
+
+.obs__offer-name {
+  font-weight: 650;
+  font-size: 13.5px;
+}
+
+.obs__offer-id {
+  display: inline-block;
+  margin-top: 3px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--text-muted);
+}
+
+.obs__offer-meta {
+  margin-top: var(--space-2);
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.obs__offer-apr {
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 550;
+  color: var(--text);
+}
+
+/* --- misc panel bits --- */
+
+.obs__thread {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.obs__link {
+  display: inline-block;
+  margin-top: var(--space-2);
+  font-size: 13px;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 550;
+}
+
+.obs__link:hover {
+  text-decoration: underline;
+}
+
+.obs__hint {
+  margin: var(--space-2) 0 0;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.obs__details {
+  margin-top: var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.obs__details summary {
+  padding: 7px 10px;
+  cursor: pointer;
+  font-size: 12.5px;
+  background: var(--surface-2);
+  user-select: none;
+}
+
+.obs__json {
+  margin: 0;
+  padding: 10px;
+  max-height: 220px;
+  overflow: auto;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.5;
+  background: var(--surface);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------- skeleton */
+
+.skeleton {
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    var(--surface-2) 25%,
+    var(--border) 37%,
+    var(--surface-2) 63%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.3s ease-in-out infinite;
+}
+
+.skeleton--select {
+  height: 35px;
+  width: 300px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+/* ---------------------------------------------------------------- toasts */
+
+.toasts {
+  position: fixed;
+  right: var(--space-5);
+  bottom: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  z-index: 50;
+}
+
+.toast {
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-lg);
+  font-size: 13px;
+  max-width: 330px;
+  opacity: 1;
+  transition: opacity 0.25s, transform 0.25s;
+}
+
+.toast--error {
+  border-color: var(--status-critical);
+  background: var(--critical-soft);
+}
+
+.toast--leaving {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+/* ---------------------------------------------------------------- motion */
+
+@media (prefers-reduced-motion: reduce) {
+  .dot,
+  .skeleton {
+    animation: none;
+  }
+  .dot {
+    opacity: 0.6;
+  }
+  .chat {
+    scroll-behavior: auto;
+  }
+  .meter__fill,
+  .toast {
+    transition: none;
+  }
+}
+
+/* ---------------------------------------------------------------- narrow */
+
+@media (max-width: 960px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+    padding: var(--space-3) var(--space-4) var(--space-4);
+  }
+
+  /* The panel scrolls internally rather than being clipped - the hero figure
+     and meter need more room than the old fixed max-height allowed. */
+  .panel--obs {
+    max-height: 60vh;
+  }
+
+  .topbar {
+    align-items: stretch;
+  }
+
+  .topbar__controls {
+    width: 100%;
+  }
+
+  .field {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .skeleton--select {
+    width: 100%;
+  }
+
+  .msg {
+    max-width: 92%;
+  }
+
+  .scroll-bottom {
+    right: var(--space-4);
+  }
+}

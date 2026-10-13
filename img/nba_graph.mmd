@@ -1,0 +1,31 @@
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	intake(intake)
+	risk_guardrail(risk_guardrail)
+	intent_router(intent_router)
+	clarify(clarify)
+	select_offer(select_offer)
+	offer_presentation(offer_presentation)
+	post_offer_chat(post_offer_chat)
+	decline(decline)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> intake;
+	intake --> risk_guardrail;
+	intent_router -.-> clarify;
+	intent_router -.-> post_offer_chat;
+	intent_router -.-> select_offer;
+	risk_guardrail -.-> decline;
+	risk_guardrail -. &nbsp;continue&nbsp; .-> intent_router;
+	select_offer --> offer_presentation;
+	clarify --> __end__;
+	decline --> __end__;
+	offer_presentation --> __end__;
+	post_offer_chat --> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc

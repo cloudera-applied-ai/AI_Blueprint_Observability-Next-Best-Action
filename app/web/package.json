@@ -1,0 +1,14 @@
+{
+  "name": "nba-chatbot-ui",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TypeScript client for the NBA Next-Best-Action chatbot on Cloudera AI.",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "clean": "node -e \"require('fs').rmSync('static/js',{recursive:true,force:true})\""
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}

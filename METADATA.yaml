@@ -1,0 +1,61 @@
+# Cloudera Blueprint catalog metadata
+# Populate fields used by the master blueprint website and internal catalog.
+
+# --- Identity ---
+name: "NBA Chatbot — Evaluated Multi-Agent Apps on Cloudera AI with LangSmith"
+slug: "cai-langsmith-evals-blueprint"                     # URL-safe repo / catalog identifier
+description: "Multi-turn Next-Best-Action credit-card chatbot on Cloudera AI: LangGraph MAS, customer-risk guardrail, and full LangSmith offline evaluation + online tracing."
+reprise_link: ""                                           # Public reprise link (to be added)
+
+# --- Classification (website filters) ---
+catalog_classification:
+  - Enterprise Blueprint                                   # Options: Enterprise Blueprint | Research | Launchable (AMP) | Developer Example
+launchable: true                                           # true | false
+lifecycle_status: Active                                   # e.g., Active | Deprecated
+
+# --- Industry & alignment ---
+industry: Financial Services                               # e.g., General | Telecom | Financial Services | Healthcare & Life Sciences | Retail | Media | Physical AI & Robotics
+industry_alignment: "Vertical"                             # Horizontal | Vertical
+target_vertical: "Retail Banking / Cards"                  # Optional finer-grained vertical
+
+# --- Tags (website search & browse) ---
+tags:
+  - langgraph
+  - langsmith
+  - multi-agent
+  - agent-observability
+  - agent-evaluation
+  - next-best-action
+  - credit-card
+  - chatbot
+  - guardrails
+  - onnx
+  - typescript
+  - fastapi
+  - retail-banking
+
+# --- Relationships ---
+product_mapping:                                           # Cloudera products used
+  - Cloudera AI Workbench
+  - Cloudera AI Inference Service
+  - Cloudera AI Registry
+model_dependencies:                                        # Models, embeddings, or external AI services
+  - nemotron
+  - xgboost-onnx (customer-risk classifier, optional)
+  - pytorch-onnx (customer-risk classifier, optional alt path)
+
+# --- Provenance ---
+publisher: cloudera                                        # cloudera | partner-name
+source: Internal                                           # Internal | Partner | NVIDIA Adaptation | Customer
+
+# --- Repository & assets ---
+public_github_link: "https://github.com/pdefusco/CAI_Agentic_NBA_Observability_Blueprint"
+#private_github_link: ""                                    # If applicable, original repo during development
+
+# --- Ownership ---
+maintainer_name: "Paul de Fusco"
+
+# --- Dates ---
+date_created: "2026-09-12"
+date_updated: "2026-09-13"
+published_date: "2026-09-13"                              # Published date / last modified

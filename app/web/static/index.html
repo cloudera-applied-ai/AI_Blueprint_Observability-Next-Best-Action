@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NBA Credit-Card Chatbot</title>
+    <meta
+      name="description"
+      content="Next-Best-Action credit-card chatbot on Cloudera AI, traced with LangSmith."
+    />
+
+    <!--
+      Theme bootstrap. Must be inline and synchronous, and must run before the
+      stylesheet paints: the module script at the end of <body> is far too late
+      and the page would visibly flash light before switching to dark.
+
+      Light is the default on purpose - the OS preference is not consulted.
+      The key here mirrors STORAGE_KEY in src/theme.ts.
+    -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("nba-theme");
+          document.documentElement.setAttribute(
+            "data-theme",
+            t === "dark" ? "dark" : "light"
+          );
+        } catch (e) {
+          document.documentElement.setAttribute("data-theme", "light");
+        }
+      })();
+    </script>
+
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>%F0%9F%92%B3</text></svg>"
+    />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar__brand">
+        <span class="topbar__mark" aria-hidden="true">◆</span>
+        <div>
+          <h1>Next-Best-Action Chatbot</h1>
+          <p class="topbar__sub">LangGraph multi-agent system on Cloudera AI</p>
+        </div>
+      </div>
+
+      <div class="topbar__controls">
+        <div class="field">
+          <label for="customer-select">Customer</label>
+          <select id="customer-select"></select>
+          <p id="customer-hint" class="hint"></p>
+        </div>
+        <button id="new-conversation" type="button" class="btn btn--ghost">
+          New conversation
+        </button>
+        <button id="theme-toggle" type="button" class="btn--icon"></button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel panel--chat" aria-label="Conversation">
+        <div id="chat" class="chat" aria-live="polite"></div>
+
+        <button
+          id="scroll-bottom"
+          type="button"
+          class="scroll-bottom"
+          aria-label="Scroll to latest message"
+          title="Scroll to latest message"
+        >
+          ↓
+        </button>
+
+        <form id="composer" class="composer" autocomplete="off">
+          <textarea
+            id="composer-input"
+            class="composer__input"
+            rows="1"
+            placeholder="Type your message…  (Enter to send, Shift+Enter for a new line)"
+            aria-label="Message"
+          ></textarea>
+          <button id="composer-send" type="submit" class="btn btn--primary">
+            Send
+          </button>
+        </form>
+      </section>
+
+      <aside class="panel panel--obs" aria-label="Observability">
+        <div class="panel__header">
+          <h2>Observability</h2>
+          <p>Graph telemetry for the current thread</p>
+        </div>
+        <div id="observability" class="obs"></div>
+      </aside>
+    </main>
+
+    <div id="toasts" class="toasts" aria-live="polite"></div>
+
+    <script type="module" src="js/main.js"></script>
+  </body>
+</html>
