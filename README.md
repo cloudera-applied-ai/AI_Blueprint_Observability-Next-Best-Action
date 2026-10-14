@@ -3,8 +3,9 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](requirements.txt)
 [![Cloudera Blueprint](https://img.shields.io/badge/Cloudera-Blueprint-f96702.svg)](METADATA.yaml)
-[![Stars](https://img.shields.io/github/stars/pdefusco/CAI_Agentic_NBA_Observability_Blueprint?logo=github)](https://github.com/pdefusco/CAI_Agentic_NBA_Observability_Blueprint/stargazers)
-[![Forks](https://img.shields.io/github/forks/pdefusco/CAI_Agentic_NBA_Observability_Blueprint?logo=github)](https://github.com/pdefusco/CAI_Agentic_NBA_Observability_Blueprint/network/members)
+[![Stars](https://img.shields.io/github/stars/cloudera-applied-ai/AI_Blueprint_Observability-Next-Best-Action?logo=github)](https://github.com/cloudera-applied-ai/AI_Blueprint_Observability-Next-Best-Action/stargazers)
+[![Forks](https://img.shields.io/github/forks/cloudera-applied-ai/AI_Blueprint_Observability-Next-Best-Action?logo=github)](https://github.com/cloudera-applied-ai/AI_Blueprint_Observability-Next-Best-Action/network/members)
+
 
 <p align="center">
   <img src="img/icon.png" alt="NBA Chatbot" width="480" />
