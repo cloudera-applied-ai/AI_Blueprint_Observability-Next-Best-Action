@@ -1,9 +1,9 @@
 # Cloudera Blueprint: NBA Chatbot — Evaluated, Observed Multi-Agent Apps on Cloudera AI with LangSmith
 
+[![Author-Paul de Fusco](https://img.shields.io/badge/Author-Paul%20de%20Fusco-555555)](https://github.com/pdefusco)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](requirements.txt)
 [![Cloudera Blueprint](https://img.shields.io/badge/Cloudera-Blueprint-f96702.svg)](METADATA.yaml)
-[![Author-Paul de Fusco](https://img.shields.io/badge/Author-Paul%20de%20Fusco-555555)]()
 [![Stars](https://img.shields.io/github/stars/cloudera-applied-ai/AI_Blueprint_Observability-Next-Best-Action?logo=github&cacheSeconds=300)](https://github.com/cloudera-applied-ai/AI_Blueprint_Observability-Next-Best-Action/stargazers)
 [![Forks](https://img.shields.io/github/forks/cloudera-applied-ai/AI_Blueprint_Observability-Next-Best-Action?logo=github&cacheSeconds=300)](https://github.com/cloudera-applied-ai/AI_Blueprint_Observability-Next-Best-Action/network/members)
 
@@ -537,8 +537,6 @@ The rules-based `_rules_based_risk_score` in `app/nba_app.py` is a placeholder. 
 - [Cloudera AI Inference Service documentation](https://docs.cloudera.com/machine-learning/cloud/ai-inference/index.html)
 - [LangGraph documentation](https://langchain-ai.github.io/langgraph/)
 - [LangSmith documentation](https://docs.smith.langchain.com/)
-
-
 
 ## License
 
