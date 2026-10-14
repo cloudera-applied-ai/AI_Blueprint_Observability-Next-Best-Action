@@ -1,18 +1,17 @@
-# NBA Chatbot — Evaluated, Observed Multi-Agent Apps on Cloudera AI with LangSmith
+# Cloudera Blueprint: NBA Chatbot — Evaluated, Observed Multi-Agent Apps on Cloudera AI with LangSmith
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](requirements.txt)
 [![Cloudera Blueprint](https://img.shields.io/badge/Cloudera-Blueprint-f96702.svg)](METADATA.yaml)
-[![Stars](https://img.shields.io/github/stars/cloudera-applied-ai/AI_Blueprint_Observability-Next-Best-Action?logo=github)](https://github.com/cloudera-applied-ai/AI_Blueprint_Observability-Next-Best-Action/stargazers)
-[![Forks](https://img.shields.io/github/forks/cloudera-applied-ai/AI_Blueprint_Observability-Next-Best-Action?logo=github)](https://github.com/cloudera-applied-ai/AI_Blueprint_Observability-Next-Best-Action/network/members)
+[![Author-Paul de Fusco](https://img.shields.io/badge/Author-Paul%20de%20Fusco-555555)]()
+[![Stars](https://img.shields.io/github/stars/cloudera-applied-ai/AI_Blueprint_Observability-Next-Best-Action?logo=github&cacheSeconds=300)](https://github.com/cloudera-applied-ai/AI_Blueprint_Observability-Next-Best-Action/stargazers)
+[![Forks](https://img.shields.io/github/forks/cloudera-applied-ai/AI_Blueprint_Observability-Next-Best-Action?logo=github&cacheSeconds=300)](https://github.com/cloudera-applied-ai/AI_Blueprint_Observability-Next-Best-Action/network/members)
 
+> A reusable blueprint for building a **Next-Best-Action** credit-card recommender as a **multi-turn chatbot** on **Cloudera AI**, powered by a **LangGraph** multi-agent workflow, guarded by a customer-risk check, and fully instrumented with **LangSmith** for offline evaluation and online monitoring.
 
 <p align="center">
   <img src="img/icon.png" alt="NBA Chatbot" width="480" />
 </p>
-
-
-> A reusable blueprint for building a **Next-Best-Action** credit-card recommender as a **multi-turn chatbot** on **Cloudera AI**, powered by a **LangGraph** multi-agent workflow, guarded by a customer-risk check, and fully instrumented with **LangSmith** for offline evaluation and online monitoring.
 
 ## Table of Contents
 
@@ -28,6 +27,8 @@
 - [Prerequisites](#prerequisites)
 - [Hardware Requirements](#hardware-requirements)
 - [Documentation](#documentation)
+- [License](#license)
+- [Disclaimer](#disclaimer)
 
 ## Overview
 

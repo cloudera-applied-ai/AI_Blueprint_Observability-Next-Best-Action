@@ -49,7 +49,7 @@ publisher: cloudera                                        # cloudera | partner-
 source: Internal                                           # Internal | Partner | NVIDIA Adaptation | Customer
 
 # --- Repository & assets ---
-public_github_link: "https://github.com/pdefusco/CAI_Agentic_NBA_Observability_Blueprint"
+public_github_link: "https://github.com/cloudera-applied-ai/AI_Blueprint_Observability-Next-Best-Action"
 #private_github_link: ""                                    # If applicable, original repo during development
 
 # --- Ownership ---
